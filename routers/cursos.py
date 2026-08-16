@@ -1,6 +1,6 @@
 #routers/curso.py
 from fastapi import APIRouter, HTTPException
-from models.curso import CursoEntrada, CursoResposta
+from schemas.curso import CursoEntrada, CursoResposta
 
 router = APIRouter(prefix="/cursos", tags=["Cursos"])
 

@@ -1,19 +1,12 @@
+#Model (SQLAlchemy) é como o dado é GUARDADO no banco de dados (models/aluno.py, herda de base) (isso que é a persistencia)
 
-from pydantic import BaseModel, Field
+from sqlalchemy.orm import Mapped, mapped_column
+from database import Base
 
-class AlunoEntrada(BaseModel):
-    nome: str = Field(min_length=3)
-    idade: int = Field(ge=16)
-    ativo: bool = True
+class Aluno(Base):
+    __tablename__ = "alunos" #nome da tabela (nome da tabela sempre no plural)
 
-
-class AlunoResposta(BaseModel):
-    id:int
-    nome:str
-    idade:int
-    ativo:bool
-
-class AlunoPach(BaseModel):
-    nome: str | None = Field(default=None, min_length=3)
-    idade: int | None = Field(default=None, ge=16)
-    ativo: bool| None = None
+    id: Mapped[int] = mapped_column(primary_key=True) # PK
+    nome: Mapped[str]
+    idade: Mapped[int]
+    ativo:Mapped[bool] = mapped_column(default=True)

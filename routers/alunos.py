@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from models.aluno import AlunoEntrada, AlunoResposta, AlunoPach
+from schemas.aluno import AlunoEntrada, AlunoResposta, AlunoPach
 
 
 router = APIRouter(prefix="/alunos", tags=["Alunos"])
