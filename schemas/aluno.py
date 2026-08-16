@@ -1,6 +1,6 @@
 #schema (pydantic) é como o dado ENTRA e SAI da API (schemas/aluno.py, herdade BaseModel) (isso que é a validaçao)
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 class AlunoEntrada(BaseModel):
     nome: str = Field(min_length=3)
@@ -9,6 +9,7 @@ class AlunoEntrada(BaseModel):
 
 
 class AlunoResposta(BaseModel):
+    model_config = ConfigDict(from_atributes=True)
     id:int
     nome:str
     idade:int
