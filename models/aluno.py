@@ -3,6 +3,7 @@
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import ForeignKey
 from database import Base
+from models.matriculas import matriculas
 
 class Aluno(Base):
     __tablename__ = "alunos" #nome da tabela (nome da tabela sempre no plural)
@@ -12,4 +13,4 @@ class Aluno(Base):
     idade: Mapped[int]
     ativo:Mapped[bool] = mapped_column(default=True)
     curso_id: Mapped[int] = mapped_column(ForeignKey("cursos.id"))
-    curso: Mapped["Curso"] = relationship(back_populates="alunos")
+    curso: Mapped["Curso"] = relationship(secundary=matriculas, back_populates="alunos")

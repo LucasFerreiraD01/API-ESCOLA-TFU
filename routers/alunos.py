@@ -1,17 +1,13 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, status
 from schemas.aluno import AlunoEntrada, AlunoResposta, AlunoPatch
 from database import SessionLocal
 from models.aluno import Aluno
 from models.curso import Curso
+from utils.utils import obter_ou_404
+from excecoes import RecursoNaoEncontrado
 
 router = APIRouter(prefix="/alunos", tags=["Alunos"])
 
-
-alunos = [
-    {"id": 1, "nome": "Ana Souza","idade": 25, "ativo": True},
-    {"id": 2, "nome": "Bruno Lima","idade": 29, "ativo": True},
-    {"id": 3, "nome": "Carla Dias","idade": 22, "ativo": False},
-]
 
 #----------------GET----------------
 
@@ -30,10 +26,9 @@ def listar_alunos(ativo:bool| None = None, limite: int=10):
             response_model=AlunoResposta)
 def buscar_aluno(aluno_id:int):
     with SessionLocal() as session:
-        aluno = session.get(Aluno, aluno_id) #ta pedindo para a orm buscar dentro da tabela aluno o parametro databela que é o aluno id
-        if aluno in None:
-            raise HTTPException(status_code=404,
-                detail= "Aluno não encontrado!")
+        aluno = session.get(Aluno, aluno_id)
+        if aluno is None:
+            raise RecursoNaoEncontrado("Aluno")
         return aluno
 
     
@@ -44,7 +39,7 @@ def criar_aluno(dados: AlunoEntrada):
     with SessionLocal() as session:
         curso = session.get(Curso, dados.curso_id)
         if curso is None:
-            raise HTTPException (status_code= 400,
+            raise HTTPException(status_code= status.HTTP_404_NOT_FOUND,
                             detail= "Curso informado não encontrado")
         aluno = Aluno(**dados.model_dump()) #transforma os dados q recebeu em formato json
         session.add(aluno)
@@ -58,7 +53,7 @@ def atualizar_aluno(aluno_id: int, dados: AlunoEntrada):
     with SessionLocal() as session:
         aluno = session.get(Aluno, aluno_id)
         if aluno is None:
-            raise HTTPException(status_code=404, detail="Aluno não encontrado!")
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Aluno não encontrado!")
         aluno.nome = dados.nome
         aluno.idade = dados.idade
         aluno.ativo = dados.ativo
@@ -71,7 +66,7 @@ def alterar_aluno(aluno_id: int, dados: AlunoPatch):
     with SessionLocal() as session:
         aluno = session.get(Aluno, aluno_id)
         if aluno is None:
-            raise HTTPException(status_code=404,
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                 detail="Aluno não encontrado!")
         mudancas = dados.model_dump(exclude_unset=True) 
         for campo, valor in mudancas.item():
@@ -81,13 +76,13 @@ def alterar_aluno(aluno_id: int, dados: AlunoPatch):
 
 
 #-------------DELETE-----------------
-@router.delete("/{aluno_id}")
+@router.delete("/{aluno_id}",
+                status_code=status.HTTP_204_NO_CONTENT)
 def remover_aluno(aluno_id: int):
     with SessionLocal() as session:
         aluno = session.get(Aluno, aluno_id)
         if aluno is None:
-            raise HTTPException(status_code=404,
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                 detail="Aluno não encontrado!")
         session.delete(aluno)
         session.commit()
-        return {"mensagem": "Aluno removido com sucesso!"}
