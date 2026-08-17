@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from routers import alunos,cursos
+from models import aluno, curso
 
 app = FastAPI(title="API - SENAI", tags= ["Status da Aplicação"])
 

@@ -1,6 +1,9 @@
 #routers/curso.py
 from fastapi import APIRouter, HTTPException
-from schemas.curso import CursoEntrada, CursoResposta
+from sqlalchemy.orm import selectinload
+from schemas.curso import CursoEntrada, CursoResposta, CursoComAlunos
+from database import SessionLocal
+from models.curso import Curso
 
 router = APIRouter(prefix="/cursos", tags=["Cursos"])
 
@@ -13,12 +16,22 @@ cursos = [
 
 @router.get("", response_model=list[CursoResposta])
 def listar_cursos():
-        return cursos
+    with SessionLocal() as session:
+        return session.query(Curso).all()
+
+@router.get("/{curso_id}", response_model=CursoComAlunos)
+def buscar_curso(curso_id: int):
+    with SessionLocal() as session: 
+        curso = session.query(Curso).opitions(selectinload(Curso.alunos)).get(curso_id)
+        if curso is None:
+            raise HTTPException(status_code=400, detail="Curso não encontrado!")
+        return curso
 
 @router.post("", response_model=CursoResposta,
             status_code=201)
-def criar_cursos(curso:CursoEntrada):
-    novo = curso.model_dump()
-    novo["id"] = max([c["id"] for c in curso], default=0)+1
-    curso.append(novo)
-    return novo
+def criar_cursos(dados: CursoEntrada):
+    with SessionLocal() as session:
+        curso = Curso(**dados.model_dump())
+        session.add(curso)
+        session.commit()
+        return curso

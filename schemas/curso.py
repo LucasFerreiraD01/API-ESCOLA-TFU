@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 class CursoEntrada(BaseModel):
     nome: str = Field(min_length=5)
@@ -8,3 +8,15 @@ class CursoResposta(BaseModel):
     id: int
     nome: str
     carga_horaria: int
+
+class AlunoResumo(BaseModel):
+    model_config = ConfigDict(from_attributes= True)
+    id: int
+    nome: str
+
+class CursoComAluno(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    nome: str
+    carga_horaria: int
+    alunos: list[AlunoResumo] = []

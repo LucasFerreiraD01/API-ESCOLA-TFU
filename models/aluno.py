@@ -1,6 +1,7 @@
 #Model (SQLAlchemy) é como o dado é GUARDADO no banco de dados (models/aluno.py, herda de base) (isso que é a persistencia)
 
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy import ForeignKey
 from database import Base
 
 class Aluno(Base):
@@ -10,3 +11,5 @@ class Aluno(Base):
     nome: Mapped[str]
     idade: Mapped[int]
     ativo:Mapped[bool] = mapped_column(default=True)
+    curso_id: Mapped[int] = mapped_column(ForeignKey("cursos.id"))
+    curso: Mapped["Curso"] = relationship(back_populates="alunos")

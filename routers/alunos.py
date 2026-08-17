@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException
 from schemas.aluno import AlunoEntrada, AlunoResposta, AlunoPatch
 from database import SessionLocal
 from models.aluno import Aluno
+from models.curso import Curso
 
 router = APIRouter(prefix="/alunos", tags=["Alunos"])
 
@@ -41,6 +42,10 @@ def buscar_aluno(aluno_id:int):
             response_model=AlunoResposta, status_code=201)
 def criar_aluno(dados: AlunoEntrada):
     with SessionLocal() as session:
+        curso = session.get(Curso, dados.curso_id)
+        if curso is None:
+            raise HTTPException (status_code= 400,
+                            detail= "Curso informado não encontrado")
         aluno = Aluno(**dados.model_dump()) #transforma os dados q recebeu em formato json
         session.add(aluno)
         session.commit()
@@ -68,7 +73,7 @@ def alterar_aluno(aluno_id: int, dados: AlunoPatch):
         if aluno is None:
             raise HTTPException(status_code=404,
                 detail="Aluno não encontrado!")
-        mudancas = dados.model_dump(exclude_unset=True)
+        mudancas = dados.model_dump(exclude_unset=True) 
         for campo, valor in mudancas.item():
             setattr(aluno, campo, valor)
         session.commit()
